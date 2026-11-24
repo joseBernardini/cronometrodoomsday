@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Vingadores: Doomsday — Contagem Regressiva</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cinzel:wght@400;600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#040605;
+    --bg-2:#08130d;
+    --doom:#3fb36f;
+    --doom-glow:rgba(63,179,111,.55);
+    --doom-deep:#0d3a22;
+    --gold:#d2ae62;
+    --gold-soft:rgba(210,174,98,.35);
+    --steel:#b7c0c6;
+    --ink:#e9eeea;
+    --muted:#8d9a93;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif}
+  body{height:100dvh}
+
+  #stage{
+    position:fixed;inset:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:clamp(16px,4vh,48px) 20px;
+    background:
+      radial-gradient(ellipse 70% 55% at 50% 38%, rgba(63,179,111,.16) 0%, transparent 70%),
+      radial-gradient(ellipse at 50% 120%, #0f2a1b 0%, transparent 60%),
+      linear-gradient(180deg,#050807 0%, var(--bg-2) 100%);
+    transform:scale(1.14);
+    filter:brightness(.55) blur(2px);
+    transition:transform 3.4s cubic-bezier(.22,.7,.2,1), filter 3.4s ease;
+  }
+  body.opened #stage{transform:scale(1);filter:none}
+
+  #stage::before{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:
+      repeating-linear-gradient(90deg, rgba(255,255,255,.018) 0 1px, transparent 1px 120px),
+      repeating-linear-gradient(0deg, rgba(255,255,255,.012) 0 1px, transparent 1px 120px);
+    mask-image:radial-gradient(ellipse at center, #000 30%, transparent 75%);
+    -webkit-mask-image:radial-gradient(ellipse at center, #000 30%, transparent 75%);
+  }
+  #stage::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,.78) 100%);
+  }
+  #dust{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+
+  .content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:clamp(10px,2.2vh,22px);max-width:1000px;width:100%}
+
+  .studio{
+    font-family:'Inter',sans-serif;font-weight:500;font-size:clamp(10px,1.3vw,12px);
+    letter-spacing:.5em;text-transform:uppercase;color:var(--muted);padding-left:.5em;
+  }
+  .logo-img{display:none;width:min(1000px,94vw);max-height:44vh;object-fit:contain;filter:drop-shadow(0 8px 30px rgba(0,0,0,.6))}
+  .has-logo .logo-img{display:block}
+  .has-logo .wordmark,.has-logo .studio{display:none}
+
+  .wordmark{display:flex;flex-direction:column;align-items:center;line-height:1}
+  .wordmark .a{
+    font-family:'Bebas Neue',sans-serif;font-size:clamp(38px,11vw,124px);letter-spacing:.1em;padding-left:.1em;
+    background:linear-gradient(180deg,#fbfdfc 0%,#c7d0d4 45%,#79858c 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 6px 24px rgba(0,0,0,.65));
+  }
+  .wordmark .d{
+    font-family:'Cinzel',serif;font-weight:800;font-size:clamp(22px,5.2vw,52px);letter-spacing:.42em;padding-left:.42em;margin-top:clamp(2px,1vh,8px);
+    color:var(--doom);text-shadow:0 0 22px var(--doom-glow),0 0 60px rgba(63,179,111,.25);
+  }
+  .rule{
+    width:min(360px,62vw);height:1px;margin:clamp(2px,1vh,10px) 0;
+    background:linear-gradient(90deg,transparent,var(--gold),transparent);position:relative;
+  }
+  .rule::after{content:"";position:absolute;left:50%;top:50%;width:7px;height:7px;background:var(--gold);transform:translate(-50%,-50%) rotate(45deg);box-shadow:0 0 12px var(--gold-soft)}
+
+  .countdown{display:flex;align-items:flex-start;justify-content:center;gap:clamp(8px,2.6vw,34px);margin-top:clamp(6px,1.4vh,14px)}
+  .unit{display:flex;flex-direction:column;align-items:center;min-width:clamp(62px,15vw,150px)}
+  .num{
+    font-family:'Bebas Neue',sans-serif;font-size:clamp(54px,12.5vw,138px);line-height:.95;letter-spacing:.02em;
+    font-variant-numeric:tabular-nums;
+    background:linear-gradient(180deg,#f6ecd0 0%,var(--gold) 55%,#8a6d32 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 4px 18px rgba(0,0,0,.6));
+  }
+  .lbl{margin-top:clamp(4px,1vh,10px);font-size:clamp(9px,1.2vw,12px);font-weight:500;letter-spacing:.38em;padding-left:.38em;text-transform:uppercase;color:var(--steel)}
+  .dots{font-family:'Bebas Neue',sans-serif;font-size:clamp(34px,7vw,80px);line-height:1.05;color:var(--doom);opacity:.55;text-shadow:0 0 18px var(--doom-glow)}
+
+  .date{margin-top:clamp(10px,2.4vh,26px);font-family:'Cinzel',serif;font-weight:400;font-size:clamp(12px,1.7vw,16px);letter-spacing:.34em;padding-left:.34em;text-transform:uppercase;color:var(--steel)}
+  .date b{color:var(--gold);font-weight:600}
+
+  .live{display:none;flex-direction:column;align-items:center;gap:14px}
+  .live h2{font-family:'Cinzel',serif;font-weight:800;font-size:clamp(26px,6vw,64px);letter-spacing:.3em;padding-left:.3em;color:var(--doom);text-shadow:0 0 28px var(--doom-glow),0 0 70px rgba(63,179,111,.3)}
+  .live p{font-size:clamp(11px,1.5vw,14px);letter-spacing:.4em;text-transform:uppercase;color:var(--steel);padding-left:.4em}
+  body.zero .countdown,body.zero .date{display:none}
+  body.zero .live{display:flex}
+
+  #sound{
+    position:fixed;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));z-index:30;
+    width:38px;height:38px;border-radius:50%;border:1px solid var(--gold-soft);background:rgba(4,8,6,.55);color:var(--gold);
+    display:none;align-items:center;justify-content:center;cursor:pointer;opacity:.7;transition:opacity .2s,border-color .2s;backdrop-filter:blur(4px)
+  }
+  #sound:hover{opacity:1;border-color:var(--gold)}
+  body.opened #sound{display:flex}
+  #sound svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  #sound .off{display:none}
+  #sound.muted .on{display:none}
+  #sound.muted .off{display:block}
+
+  #gate{position:fixed;inset:0;z-index:100;perspective:1600px;perspective-origin:50% 50%;overflow:hidden;background:#000;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  #gate.gone{display:none}
+  #light{
+    position:absolute;inset:0;opacity:0;transition:opacity 2.4s ease .1s;
+    background:radial-gradient(ellipse 22% 80% at 50% 50%, rgba(190,255,220,.95) 0%, rgba(63,179,111,.55) 35%, transparent 75%);
+  }
+  #gate.open #light{opacity:1}
+  #gate.open{background:transparent;transition:background 1s ease .4s}
+  .leaf{
+    position:absolute;top:0;width:50%;height:100%;
+    transition:transform 3.1s cubic-bezier(.55,.05,.25,1);
+    will-change:transform;backface-visibility:hidden;
+  }
+  .leaf.l{left:0;transform-origin:0% 50%}
+  .leaf.r{right:0;transform-origin:100% 50%}
+  #gate.open .leaf.l{transform:rotateY(104deg)}
+  #gate.open .leaf.r{transform:rotateY(-104deg)}
+  .leaf svg{display:block;width:100%;height:100%}
+  .leaf::after{
+    content:"";position:absolute;inset:0;pointer-events:none;transition:opacity 3s ease;
+    background:linear-gradient(90deg,rgba(0,0,0,.55),transparent 35%,transparent 65%,rgba(0,0,0,.35));
+  }
+  #gate.open .leaf::after{opacity:.2}
+  .leaf.r::after{background:linear-gradient(270deg,rgba(0,0,0,.55),transparent 35%,transparent 65%,rgba(0,0,0,.35))}
+
+  #hint{
+    position:absolute;left:50%;bottom:max(7vh,40px);transform:translateX(-50%);z-index:5;pointer-events:none;
+    font-family:'Cinzel',serif;font-size:clamp(11px,1.6vw,14px);letter-spacing:.5em;padding-left:.5em;text-transform:uppercase;color:var(--gold);
+    text-shadow:0 2px 14px rgba(0,0,0,.9);animation:hint 2.6s ease-in-out infinite;transition:opacity .6s;white-space:nowrap
+  }
+  #gate.open #hint{opacity:0;animation:none}
+  @keyframes hint{0%,100%{opacity:.45}50%{opacity:1}}
+
+  @media (prefers-reduced-motion:reduce){
+    #stage,.leaf,#light{transition-duration:.6s}
+    #hint{animation:none}
+  }
+</style>
+</head>
+<body>
+
+<main id="stage">
+  <canvas id="dust"></canvas>
+  <div class="content" id="content">
+    <div class="studio">Marvel Studios</div>
+    <img class="logo-img" id="logo-img" alt="Vingadores: Doomsday">
+    <div class="wordmark">
+      <div class="a">VINGADORES</div>
+      <div class="d">DOOMSDAY</div>
+    </div>
+    <div class="rule"></div>
+
+    <div class="countdown" id="countdown">
+      <div class="unit"><span class="num" id="dd">00</span><span class="lbl">Dias</span></div>
+      <div class="dots">:</div>
+      <div class="unit"><span class="num" id="hh">00</span><span class="lbl">Horas</span></div>
+      <div class="dots">:</div>
+      <div class="unit"><span class="num" id="mm">00</span><span class="lbl">Min</span></div>
+      <div class="dots">:</div>
+      <div class="unit"><span class="num" id="ss">00</span><span class="lbl">Seg</span></div>
+    </div>
+    <div class="date">18 <b>Dez</b> 2026 · 21:30</div>
+
+    <div class="live">
+      <h2>IT'S DOOMSDAY</h2>
+    </div>
+  </div>
+</main>
+
+<button id="sound" aria-label="Som" title="Som">
+  <svg class="on" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+  <svg class="off" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>
+</button>
+
+<div id="gate" role="button" tabindex="0" aria-label="Abrir portão">
+  <div id="light"></div>
+  <div class="leaf l" id="leaf-l"></div>
+  <div class="leaf r" id="leaf-r"></div>
+  <div id="hint">Clique para entrar</div>
+</div>
+
+<script>
+  const TARGET = new Date("2026-12-18T21:30:00-03:00").getTime();
+
+  const PLAYLIST = [
+    "audio/doomsday.mp3",
+    "audio/all-caps.mp3",
+    "audio/rapp-snitch-knishes.mp3",
+    "audio/one-beer.mp3"
+  ];
+  const VOLUME = 0.4;
+
+  const $ = id => document.getElementById(id);
+  const pad = n => String(n).padStart(2,'0');
+
+  (function(){
+    const img = $('logo-img');
+    img.onload = () => document.body.classList.add('has-logo');
+    img.onerror = () => img.remove();
+    img.src = 'assets/logo.png';
+  })();
+
+  function leafSVG(side, w, h){
+    const L = side === 'l';
+    const gap = Math.max(32, Math.min(52, w / 9));
+    const bw = 7;
+    const post = 16;
+    const R = Math.min(h * 0.2, w * 0.7);
+    const cy = h * 0.5;
+    const cx = L ? w : 0;
+    const r1 = h * 0.12, r2 = h * 0.3, r3 = h * 0.88;
+    const gid = 'g' + side;
+    let s = '';
+    s += `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">`;
+    s += `<defs>
+      <linearGradient id="iron-${gid}" x1="0" x2="1"><stop offset="0" stop-color="#262b2e"/><stop offset=".5" stop-color="#0c0e0f"/><stop offset="1" stop-color="#1d2124"/></linearGradient>
+      <linearGradient id="ironH-${gid}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2a3034"/><stop offset=".5" stop-color="#0b0d0e"/><stop offset="1" stop-color="#1c2023"/></linearGradient>
+      <linearGradient id="gold-${gid}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f6ecd0"/><stop offset=".5" stop-color="#d2ae62"/><stop offset="1" stop-color="#7d6230"/></linearGradient>
+      <radialGradient id="disk-${gid}" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#0f2e1d"/><stop offset=".75" stop-color="#07130d"/><stop offset="1" stop-color="#030806"/></radialGradient>
+    </defs>`;
+    s += `<rect width="${w}" height="${h}" fill="#020303"/>`;
+
+    const xs = [];
+    let x = L ? post + gap * 0.6 : w - post - gap * 0.6;
+    const step = L ? gap : -gap;
+    while (L ? x < w - 6 : x > 6) { xs.push(x); x += step; }
+
+    xs.forEach(bx => {
+      s += `<rect x="${bx - bw/2}" y="${h*0.06 + 22}" width="${bw}" height="${h}" fill="url(#iron-${gid})"/>`;
+      s += `<path d="M${bx - 8} ${h*0.06 + 30} L${bx} ${h*0.06} L${bx + 8} ${h*0.06 + 30} L${bx} ${h*0.06 + 24} Z" fill="url(#gold-${gid})"/>`;
+      s += `<rect x="${bx - 5}" y="${h*0.06 + 30}" width="10" height="4" fill="url(#gold-${gid})"/>`;
+    });
+
+    for (let i = 0; i < xs.length - 1; i++) {
+      const mx = (xs[i] + xs[i+1]) / 2;
+      const rr = gap * 0.33;
+      s += `<circle cx="${mx}" cy="${(r1 + r2)/2 + 4}" r="${rr}" fill="none" stroke="#7a6232" stroke-width="2.2"/>`;
+      s += `<circle cx="${mx}" cy="${(r1 + r2)/2 + 4}" r="${rr*0.38}" fill="url(#gold-${gid})" opacity=".9"/>`;
+    }
+
+    [[r1, 11], [r2, 10], [r3, 14]].forEach(([ry, rh]) => {
+      s += `<rect x="0" y="${ry}" width="${w}" height="${rh}" fill="url(#ironH-${gid})"/>`;
+      s += `<rect x="0" y="${ry}" width="${w}" height="1.5" fill="rgba(255,255,255,.12)"/>`;
+    });
+    s += `<rect x="0" y="${h - 10}" width="${w}" height="10" fill="url(#ironH-${gid})"/>`;
+
+    const px = L ? 0 : w - post;
+    s += `<rect x="${px}" y="0" width="${post}" height="${h}" fill="url(#iron-${gid})"/>`;
+    s += `<rect x="${px - (L?0:2)}" y="${h*0.03}" width="${post + 2}" height="10" fill="url(#gold-${gid})"/>`;
+    const sx = L ? w - 9 : 0;
+    s += `<rect x="${sx}" y="0" width="9" height="${h}" fill="url(#iron-${gid})"/>`;
+
+    s += `<circle cx="${cx}" cy="${cy}" r="${R*1.12}" fill="#020403" opacity=".85"/>`;
+    s += `<circle cx="${cx}" cy="${cy}" r="${R}" fill="url(#disk-${gid})" stroke="url(#gold-${gid})" stroke-width="${Math.max(4, R*0.05)}"/>`;
+    s += `<circle cx="${cx}" cy="${cy}" r="${R*0.86}" fill="none" stroke="#3fb36f" stroke-opacity=".75" stroke-width="2"/>`;
+    s += `<circle cx="${cx}" cy="${cy}" r="${R*0.74}" fill="none" stroke="#d2ae62" stroke-opacity=".35" stroke-width="1"/>`;
+    for (let i = 0; i < 24; i++) {
+      const a = (i / 24) * Math.PI * 2;
+      const x1 = cx + Math.cos(a) * R * 0.9, y1 = cy + Math.sin(a) * R * 0.9;
+      const x2 = cx + Math.cos(a) * R * 0.96, y2 = cy + Math.sin(a) * R * 0.96;
+      s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#d2ae62" stroke-opacity=".6" stroke-width="1.4"/>`;
+    }
+    s += `<text x="${cx}" y="${cy + R*0.42}" text-anchor="middle" font-family="Cinzel, serif" font-weight="800" font-size="${R*1.25}" fill="url(#gold-${gid})" stroke="#3a2d12" stroke-width="1">A</text>`;
+    s += `</svg>`;
+    return s;
+  }
+
+  function buildGate(){
+    const w = Math.ceil(window.innerWidth / 2);
+    const h = window.innerHeight;
+    $('leaf-l').innerHTML = leafSVG('l', w, h);
+    $('leaf-r').innerHTML = leafSVG('r', w, h);
+  }
+  buildGate();
+  let rz;
+  window.addEventListener('resize', () => {
+    if ($('gate').classList.contains('open')) return;
+    clearTimeout(rz); rz = setTimeout(buildGate, 120);
+  });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => {
+    if (!$('gate').classList.contains('open')) buildGate();
+  });
+
+  let actx = null;
+  function gateSound(){
+    try{
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      if (actx.state === 'suspended') actx.resume();
+      const t = actx.currentTime;
+      const master = actx.createGain();
+      master.gain.value = 0.55;
+      master.connect(actx.destination);
+
+      const clunk = actx.createBufferSource();
+      const nb = actx.createBuffer(1, actx.sampleRate * 0.35, actx.sampleRate);
+      const nd = nb.getChannelData(0);
+      for (let i = 0; i < nd.length; i++) nd[i] = (Math.random()*2 - 1) * Math.pow(1 - i/nd.length, 3);
+      clunk.buffer = nb;
+      const lp = actx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 700;
+      const cg = actx.createGain(); cg.gain.value = 0.9;
+      clunk.connect(lp); lp.connect(cg); cg.connect(master);
+      clunk.start(t);
+
+      const osc = actx.createOscillator(); osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(70, t + 0.35);
+      osc.frequency.linearRampToValueAtTime(46, t + 3.3);
+      const bp = actx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 7;
+      bp.frequency.setValueAtTime(420, t + 0.35);
+      bp.frequency.linearRampToValueAtTime(1100, t + 1.8);
+      bp.frequency.linearRampToValueAtTime(520, t + 3.3);
+      const lfo = actx.createOscillator(); lfo.frequency.value = 9;
+      const lg = actx.createGain(); lg.gain.value = 0.05;
+      const og = actx.createGain(); og.gain.value = 0.0001;
+      lfo.connect(lg); lg.connect(og.gain);
+      og.gain.setValueAtTime(0.0001, t + 0.35);
+      og.gain.exponentialRampToValueAtTime(0.16, t + 0.9);
+      og.gain.setValueAtTime(0.16, t + 2.4);
+      og.gain.exponentialRampToValueAtTime(0.0001, t + 3.4);
+      osc.connect(bp); bp.connect(og); og.connect(master);
+      osc.start(t + 0.35); lfo.start(t + 0.35);
+      osc.stop(t + 3.5); lfo.stop(t + 3.5);
+    }catch(e){}
+  }
+
+  const audio = new Audio();
+  audio.preload = 'auto';
+  let lastIdx = -1, muted = false, fadeTimer = null;
+
+  function pickNext(){
+    if (PLAYLIST.length === 1) return 0;
+    let i;
+    do { i = Math.floor(Math.random() * PLAYLIST.length); } while (i === lastIdx);
+    return i;
+  }
+  function playNext(){
+    lastIdx = pickNext();
+    audio.src = PLAYLIST[lastIdx];
+    audio.play().catch(() => {});
+  }
+  audio.addEventListener('ended', playNext);
+  audio.addEventListener('error', () => setTimeout(playNext, 400));
+
+  function fadeIn(ms){
+    clearInterval(fadeTimer);
+    audio.volume = 0;
+    const t0 = performance.now();
+    fadeTimer = setInterval(() => {
+      const k = Math.min(1, (performance.now() - t0) / ms);
+      audio.volume = VOLUME * k;
+      if (k >= 1) clearInterval(fadeTimer);
+    }, 60);
+  }
+
+  const gate = $('gate');
+  let opened = false;
+  function openGate(){
+    if (opened) return;
+    opened = true;
+    document.body.classList.add('opened');
+    gate.classList.add('open');
+    gateSound();
+    playNext();
+    fadeIn(5000);
+    setTimeout(() => gate.classList.add('gone'), 3700);
+  }
+  gate.addEventListener('click', openGate);
+  gate.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openGate(); } });
+
+  $('sound').addEventListener('click', () => {
+    muted = !muted;
+    audio.muted = muted;
+    $('sound').classList.toggle('muted', muted);
+  });
+
+  const dd = $('dd'), hh = $('hh'), mm = $('mm'), ss = $('ss');
+  let timer = null;
+  function tick(){
+    const diff = TARGET - Date.now();
+    if (diff <= 0){
+      document.body.classList.add('zero');
+      clearInterval(timer);
+      return;
+    }
+    const s = Math.floor(diff / 1000);
+    dd.textContent = pad(Math.floor(s / 86400));
+    hh.textContent = pad(Math.floor((s % 86400) / 3600));
+    mm.textContent = pad(Math.floor((s % 3600) / 60));
+    ss.textContent = pad(s % 60);
+  }
+  tick();
+  if (!document.body.classList.contains('zero')) timer = setInterval(tick, 1000);
+
+  (function(){
+    const c = $('dust'), g = c.getContext('2d');
+    let W, H, P = [];
+    function size(){ W = c.width = innerWidth * devicePixelRatio; H = c.height = innerHeight * devicePixelRatio; }
+    size(); addEventListener('resize', size);
+    const N = 55;
+    for (let i = 0; i < N; i++) P.push({
+      x: Math.random(), y: Math.random(), r: Math.random() * 1.6 + .4,
+      v: Math.random() * .00008 + .00002, d: (Math.random() - .5) * .00008,
+      a: Math.random() * .5 + .15, g: Math.random() < .35
+    });
+    (function frame(){
+      g.clearRect(0, 0, W, H);
+      P.forEach(p => {
+        p.y -= p.v * 16; p.x += p.d * 16;
+        if (p.y < -.02) { p.y = 1.02; p.x = Math.random(); }
+        g.beginPath();
+        g.arc(p.x * W, p.y * H, p.r * devicePixelRatio, 0, 6.2832);
+        g.fillStyle = p.g ? `rgba(210,174,98,${p.a})` : `rgba(63,179,111,${p.a})`;
+        g.fill();
+      });
+      requestAnimationFrame(frame);
+    })();
+  })();
+</script>
+</body>
+</html>
